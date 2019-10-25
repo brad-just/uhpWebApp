@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% if member %}
+  <div id="container" class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-sm-10 align-self-center">
+        <div class="row mt-3 mb-3">
+          <div class="col">
+            <div class="card text-center">
+              <div class="card-body">
+                <h3 class="card-title">CURRENT STATUS: {{ status }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3 mb-3">
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-header text-center">
+                <h3 class="card-title">Your UHP Event</h3>
+              </div>
+
+              <div class="card-body m-3">
+
+                  <div class="row">
+                    <div class="col text-center border">
+                      <p>STATUS</p>
+                    </div>
+                    <div class="col text-center border">
+                      <p>{{ uhp_status }}</p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col text-center border">
+                      <p>EVENT</p>
+                    </div>
+                    <div class="col text-center border">
+                      <p>{{ uhp_event }}</p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col text-center border">
+                      <p>DATE</p>
+                    </div>
+                    <div class="col text-center border">
+                      <p>{{ uhp_date }}</p>
+                    </div>
+                  </div>
+
+            </div>
+
+            <a href="{{ url_for( 'home' ) }}" class="btn-link text-center p-3">Plan Next Event</a>
+
+          </div>
+        </div>
+
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-header text-center">
+              <h3 class="card-title">Your Social Justice Event</h3>
+            </div>
+
+            <div class="card-body m-3">
+
+                <div class="row">
+                  <div class="col text-center border">
+                    <p>STATUS</p>
+                  </div>
+                  <div class="col text-center border">
+                    <p>{{ sj_status }}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col text-center border">
+                    <p>EVENT</p>
+                  </div>
+                  <div class="col text-center border">
+                    <p>{{ sj_event }}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col text-center border">
+                    <p>DATE</p>
+                  </div>
+                  <div class="col text-center border">
+                    <p>{{ sj_date }}</p>
+                  </div>
+                </div>
+
+          </div>
+
+          <a href="{{ url_for( 'home' ) }}" class="btn-link text-center p-3">Plan Next Event</a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<div id="container" class="container-fluid">
+  <div class="row justify-content-center mt-3 mb-3">
+    <div class="col-sm-10 align-self-center">
+      <div class="card">
+        <div class="card-body text-center">
+          <h3 class="card-title">
+            Honors Students are required to complete 1 UHP Event and 1 Social Justice Event every year
+            in order to maintain their honors status. If you are a member of the honors program and would
+            like to see your status, please sign in with your SCU Account using the Google Sign In button
+            at the top right of your screen.
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+<script type="text/javascript">
+  $container = $('#container')
+  $container.css('min-height', $( window ).height() - 200)
+</script>
+{% endblock content %}

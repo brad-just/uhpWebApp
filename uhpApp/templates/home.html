@@ -1,0 +1,194 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <div class="row justify-content-center mt-5 mb-5 ml-1 mr-1">
+
+    <iframe src="https://calendar.google.com/calendar/b/0/embed?height=600&amp;wkst=1&amp;bgcolor=%23ac233c&amp;ctz=America%2FLos_Angeles&amp;src=dWhwYXBwQGdtYWlsLmNvbQ&amp;src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%23039BE5&amp;color=%230B8043&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=1&amp;showCalendars=0" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
+  </div>
+
+  <div class="row justify-content-center mt-3 mb-3">
+    <div class="col-sm-6 mt-3 mb-3">
+
+      <div class="row">
+        <div class="col">
+
+          <p class="h3 text-center">Upcoming Events</p>
+
+          <div class="border border-dark w-100" style="height:1px;"></div>
+
+        </div>
+
+      </div>
+
+      <div id="successful-rsvp" class="alert alert-success text-center mt-3" role="alert" ari-hidden="true">
+        Thanks for letting us know you are coming!
+      </div>
+      <script type="text/javascript">
+        $('#successful-rsvp').hide()
+      </script>
+
+      <div id="not-signed-in-rsvp" class="alert alert-danger text-center mt-3" role="alert">
+        It appears that you are not signed it. Sign in and try again.
+      </div>
+      <script type="text/javascript">
+        $('#not-signed-in-rsvp').hide()
+      </script>
+
+      <div id="successful-signin" class="alert alert-success text-center mt-3" role="alert" ari-hidden="true">
+        You are signed in! Enjoy the event!
+      </div>
+      <script type="text/javascript">
+        $('#successful-signin').hide()
+      </script>
+
+      <div id="unsussessful-signin" class="alert alert-danger text-center mt-3" role="alert">
+        Your sign in attempt has failed. First make sure you are signed into the app with your SCU Gmail account.
+        If you already are, try signing in again and make sure you are close to the event.
+      </div>
+      <script type="text/javascript">
+        $('#unsussessful-signin').hide()
+      </script>
+
+        {% for event in Events %}
+        <div class="row mt-3 mb-3">
+
+          <div class="col">
+            <div class="card bg-grey">
+              <div class="card-header">
+                <h5 class="card-title text-center">{{ event['title'] }}</h5>
+              </div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item text-center">{{ event['requirement'] }}</li>
+                <li class="list-group-item text-center">{{ event['location'] }}</li>
+                <li class="list-group-item text-center">{{ event['date'] }}</li>
+                <li class="list-group-item text-center">{{ event['time'] }}</li>
+              </ul>
+              <div class="card-body">
+                <div class="row justify-content-around">
+                  <button type="button" class="btn btn-lg btn-block bg-header text-white ml-5 mr-5 m-1" data-toggle="modal" data-target="#modal-{{ loop.index }}">Description</button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-lg bg-cream" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLongTitle">{{ event['title'] }}</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <p>{{ event['description'] }}</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn bg-header text-white" data-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% if event['isNow'] %}
+                    <button id="signin-button-{{loop.index}}" class="btn btn-lg btn-block ml-5 mr-5 bg-header text-white m-1">SIGN IN</button>
+                    <script type="text/javascript">
+                      var $button = $('#signin-button-{{loop.index}}')
+                      $button.click(function(){
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(function(position){
+                            var locationCheck = Math.sqrt(Math.pow(Number({{ event['longitude'] }}) - position.coords.longitude,2) + Math.pow(Number({{ event['latitude'] }}) - position.coords.latitude,2)) <= Number({{ event['radius'] }})
+                            $.ajax({
+                                url: "{{ url_for( 'event_sign_in' ) }}",
+                                dataType: 'json',
+                                type: 'post',
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                                      "title": "{{ event['title'] }}",
+                                                      "requirement": "{{ event['requirement'] }}",
+                                                      "longitude": position.coords.longitude,
+                                                      "latitude": position.coords.latitude,
+                                                      "locationCheck": locationCheck,
+                                                    }),
+                                processData: false,
+                                success: function( data, textStatus, jQxhr ){
+                                  if(data == 'Not Signed In' || !locationCheck){
+                                    $('.alert').hide()
+                                    $('#unsussessful-signin').show()
+                                  }
+                                  else{
+                                    $('.alert').hide()
+                                    $('#successful-signin').show()
+                                  }
+                                },
+                              })
+                          });
+                        } else {
+                          alert("Geolocation is not supported by this browser. You need to email the honors program and tell them what happened if you want credit for this event.");
+                        }
+                      })
+                    </script>
+                  {% else %}
+                    <button id="rsvp-button-{{loop.index}}" class="btn btn-lg btn-block ml-5 mr-5 bg-header text-white m-1">RSVP</button>
+                    <script type="text/javascript">
+                      var $button = $('#rsvp-button-{{loop.index}}')
+                      $button.click(function(){
+                        $.ajax({
+                            url: "{{ url_for( 'rsvp' ) }}",
+                            dataType: 'json',
+                            type: 'post',
+                            contentType: 'application/json',
+                            data: JSON.stringify( { "title": "{{ event['title'] }}" } ),
+                            processData: false,
+                            success: function( data, textStatus, jQxhr ){
+                              if(data == 'Not Signed In'){
+                                $('.alert').hide()
+                                $('#not-signed-in-rsvp').show()
+                              }
+                              else{
+                                $('.alert').hide()
+                                $('#successful-rsvp').show()
+                              }
+                            },
+                          })
+                      })
+                    </script>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="col-sm-6 mt-3 mb-3">
+        <div class="row">
+          <div class="col">
+
+            <p class="h3 text-center">Program Updates</p>
+
+            <div class="border border-dark align-self-center w-100" style="height:1px;"></div>
+
+          </div>
+        </div>
+
+        {% for update in Updates %}
+        <div class="row mt-3 mb-3">
+          <div class="col">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ update['Subject'] }}</h5>
+                <p class="card-text">{{ update['Body'] }}</p>
+                <p class="card-text text-left">- {{ update['Author'] }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+
+    </div>
+</div>
+
+{% endblock content %}
